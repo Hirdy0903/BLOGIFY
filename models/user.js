@@ -8,12 +8,20 @@ const userSchema = new Schema(
     FullName: {
       type: String,
       required: true,
+      trim: true,
     },
 
-    Email: {
+    email: {
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    Email: {
+      type: String,
+      lowercase: true,
+      trim: true,
     },
     salt: {
       type: String,
