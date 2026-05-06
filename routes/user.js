@@ -9,8 +9,8 @@ router.get('/signup', (req, res) => {
 });
 router.post('/signup', async (req, res) => {
   console.log('Signup route hit, body:', req.body);
-  const fullName = req.body.fullName;
-  const email = req.body.email;
+  const fullName = (req.body.fullName || '').trim();
+  const email = (req.body.email || '').trim().toLowerCase();
   const password = req.body.password;
 
   console.log(
@@ -27,9 +27,24 @@ router.post('/signup', async (req, res) => {
   }
 
   try {
+    const existingUser = await User.findOne({
+      $or: [{ email }, { Email: email }],
+    });
+    if (existingUser) {
+      console.log('Existing user found, updating...');
+      existingUser.FullName = fullName;
+      existingUser.email = email;
+      existingUser.Email = email;
+      existingUser.Password = password;
+      await existingUser.save();
+      console.log('User updated successfully');
+      return res.redirect('/');
+    }
+
     console.log('Attempting to create user...');
     await User.create({
       FullName: fullName,
+      email,
       Email: email,
       Password: password,
     });
