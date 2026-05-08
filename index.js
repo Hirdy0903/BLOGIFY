@@ -3,12 +3,17 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const { router: userRoute } = require('./routes/user');
+const cookieParser=require('cookie-parser');
+const { checkForAuthenticatioInCookiee } = require('./middleware/authentication');
+
 
 const app = express();
 const port = 9987;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(checkForAuthenticatioInCookiee('token'));
 
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
@@ -19,7 +24,9 @@ app.set('view engine', 'ejs');
 app.set('views', path.resolve('./views'));
 
 app.get('/', (req, res) => {
-  res.render('homepage');
+  res.render('homepage',{
+    user:req.user
+  });
 });
 app.use('/user', userRoute);
 
