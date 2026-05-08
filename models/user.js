@@ -50,6 +50,15 @@ userSchema.pre('save', function () {
   user.salt = salt;
   user.Password = hash;
 });
+userSchema.static('validatePassword', async function (email, password) {
+  const user = await this.findOne({ email });
+  if(!user)throw new Error('Invalid email or password');
+  const salt = user.salt;
+  const hash =user.Password;
+  const userHash = createHmac('sha256', salt).update(password).digest('hex');
+  if(userHash!==hash)throw new Error('Invalid email or password');
+  return user ;
+});
 
 const User = model('User', userSchema);
 module.exports = { User };

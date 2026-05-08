@@ -41,5 +41,13 @@ router.post('/signup', async (req, res) => {
     return res.status(500).send('Error: ' + error.message);
   }
 });
+router.post('/signin',async(req,res)=>{
+  const {email,password}=req.body;
+  const user=await User.validatePassword(email,password);
+  console.log('User',user);
+  return res.redirect('/');
+
+
+})
 
 module.exports = { router };
