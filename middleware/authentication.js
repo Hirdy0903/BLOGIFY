@@ -1,19 +1,22 @@
-function checkForAuthenticatioInCookiee(cookieName){
-    return (req,res,next)=>{
-        const tokenCookieValue=req.cookies[cookieName];
-        if(!tokenCookieValue){
-            next();
+const { validatetoken } = require("../services/authentication");
 
+function checkForAuthenticatioInCookiee(cookieName) {
+    return (req, res, next) => {
+        const tokenCookieValue = req.cookies[cookieName];
+
+        if (!tokenCookieValue) {
+            return next();
         }
-        try{
-            const userpayload=validatetoken(tokenCookieValue);
 
+        try {
+            const userpayload = validatetoken(tokenCookieValue);
+            req.user = userpayload;
+        } catch (err) {
+            return next();
         }
-        catch(err){}
-        next();
 
-         
-    }
-
+        return next();
+    };
 }
-module.exports={checkForAuthenticatioInCookiee};
+
+module.exports = { checkForAuthenticatioInCookiee };
