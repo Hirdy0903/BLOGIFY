@@ -5,8 +5,7 @@ const mongoose = require('mongoose');
 const { router: userRoute } = require('./routes/user');
 const cookieParser=require('cookie-parser');
 const { checkForAuthenticatioInCookiee } = require('./middleware/authentication');
-
-
+const { router: blogRoute } = require('./routes/blog');
 const app = express();
 const port = 9987;
 
@@ -20,6 +19,7 @@ app.use((req, res, next) => {
   next();
 });
 
+
 app.set('view engine', 'ejs');
 app.set('views', path.resolve('./views'));
 
@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
   });
 });
 app.use('/user', userRoute);
-
+app.use('/blog', blogRoute);
 if (require.main === module) {
   mongoose
     .connect(
