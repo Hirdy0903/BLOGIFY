@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
 require('dotenv').config();
 
 const { router: userRoute } = require('./routes/user');
@@ -12,6 +13,8 @@ const { globalErrorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 const port = process.env.PORT || 9987;
+app.use(helmet());
+//dont need a cors because we are using a monolith app mtlb dono ek sath fronend and backend
 
 mongoose
   .connect(process.env.URI)

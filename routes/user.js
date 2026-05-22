@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const { User } = require('../models/user');
 const { validateSignup } = require('../validators/validators');
+const { authLimiter } = require('../middleware/rateLimiter');
 
 const router = Router();
 
@@ -12,7 +13,7 @@ router.get('/signup', (req, res) => {
   res.render('signup', { errors: null, prevInput: {} });
 });
 
-router.post('/signup', validateSignup, async (req, res, next) => {
+router.post('/signup',authLimiter ,validateSignup, async (req, res, next) => {
   try {
     const { fullName, email, password } = req.body;
 
@@ -37,7 +38,7 @@ router.post('/signup', validateSignup, async (req, res, next) => {
   }
 });
 
-router.post('/signin', async (req, res, next) => {
+router.post('/signin', authLimiter, async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const token = await User.validatePasswordandgeneratetoken(email, password);
