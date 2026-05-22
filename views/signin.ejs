@@ -1,41 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <%- include("./partials/head")%>
+<head>
+<%- include("./partials/head")%>
     <title>Signin</title>
-  </head>
-  <body>
-    <%- include("./partials/nav")%>
+</head>
+<body>
+<%- include("./partials/nav")%>
 
-    <div class="container">
-      <form action="/user/signin" method="POST">
-        <div class="mb-3">
-          <label for="signinEmail" class="form-label">Email address</label>
-          <input
-            type="email"
-            class="form-control"
-            id="signinEmail"
-            aria-describedby="emailHelp"
-            name="email"
-          />
-          <div id="emailHelp" class="form-text">
-            We'll never share your email with anyone else.
-          </div>
+<div class="container mt-4">
+    <form action="/user/signin" method="POST">
+      <div class="mb-3">
+        <label for="signinEmail" class="form-label">Email address</label>
+        <input
+          type="email"
+          class="form-control"
+          id="signinEmail"
+          name="email"
+          required
+        />
+        <div id="emailHelp" class="form-text">
+          We'll never share your email with anyone else.
         </div>
-        <div class="mb-3">
-          <label for="signinPassword" class="form-label">Password</label>
-          <input
-            type="password"
-            class="form-control"
-            id="signinPassword"
-            name="password"
-          />
-        </div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="signinPassword" class="form-label">Password</label>
+        <input
+          type="password"
+          class="form-control"
+          id="signinPassword"
+          name="password"
+          required
+        />
+      </div>
 
-        <button type="submit" class="btn btn-primary">Sign in</button>
-      </form>
-    </div>
+      <button type="submit" class="btn btn-primary">Sign in</button>
+    </form>
+</div>
 
-    <%- include("./partials/scripts")%>
-  </body>
+<%- include("./partials/scripts")%>
+</body>
 </html>
