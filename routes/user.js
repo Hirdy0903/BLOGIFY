@@ -1,60 +1,56 @@
 const { Router } = require('express');
 const { User } = require('../models/user');
+const { validateSignup } = require('../validators/validators');
+const { authLimiter } = require('../middleware/rateLimiter');
+
 const router = Router();
+
 router.get('/signin', (req, res) => {
-  res.render('signin');
+  res.render('signin', { error: null });
 });
+
 router.get('/signup', (req, res) => {
-  res.render('signup');
+  res.render('signup', { errors: null, prevInput: {} });
 });
-router.post('/signup', async (req, res) => {
-  console.log('Signup route hit, body:', req.body);
-  const fullName = (req.body.fullName || '').trim();
-  const email = (req.body.email || '').trim().toLowerCase();
-  const password = req.body.password;
 
-  console.log(
-    'Form data - fullName:',
-    fullName,
-    'email:',
-    email,
-    'password:',
-    password,
-  );
-
-  if (!fullName || !email || !password) {
-    return res.status(400).send('Full name, email, and password are required.');
-  }
-
+router.post('/signup',authLimiter ,validateSignup, async (req, res, next) => {
   try {
-    const existingUser = await User.findOne({
-      $or: [{ email }, { Email: email }],
-    });
+    const { fullName, email, password } = req.body;
+
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      console.log('Existing user found, updating...');
-      existingUser.FullName = fullName;
-      existingUser.email = email;
-      existingUser.Email = email;
-      existingUser.Password = password;
-      await existingUser.save();
-      console.log('User updated successfully');
-      return res.redirect('/');
+      return res.status(400).render('signup', {
+        errors: { email: 'An account with this email already exists. Please sign in.' },
+        prevInput: req.body
+      });
     }
 
-    console.log('Attempting to create user...');
+    // Double check these keys match your Schema design exactly:
     await User.create({
       FullName: fullName,
-      email,
-      Email: email,
+      email: email,
       Password: password,
     });
-    console.log('User created successfully');
+
     return res.redirect('/');
   } catch (error) {
-    console.error('Error creating user:', error.message);
-    console.error('Full error:', error);
-    return res.status(500).send('Error: ' + error.message);
+    next(error);
   }
+});
+
+router.post('/signin', authLimiter, async (req, res, next) => {
+  const { email, password } = req.body;
+  try {
+    const token = await User.validatePasswordandgeneratetoken(email, password);
+    console.log(token);
+    return res.cookie('token', token).redirect('/');
+  } catch (error) {
+    return res.render('signin', { error: 'Invalid email or password.' });
+  }
+});
+
+router.get("/signout", (req, res) => {
+  res.clearCookie('token').redirect("/");
 });
 
 module.exports = { router };

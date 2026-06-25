@@ -1,7 +1,9 @@
+
 const mongoose = require('mongoose');
 
 const { createHmac, randomBytes } = require('node:crypto');
 const { Schema, model } = mongoose;
+const{createToken}=require('../services/authentication');
 
 const userSchema = new Schema(
   {
@@ -10,16 +12,10 @@ const userSchema = new Schema(
       required: true,
       trim: true,
     },
-
     email: {
       type: String,
       required: true,
       unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    Email: {
-      type: String,
       lowercase: true,
       trim: true,
     },
@@ -32,7 +28,7 @@ const userSchema = new Schema(
     },
     profilePic: {
       type: String,
-      default: './default-profile-pic.jpg',
+       default: 'public/images/default.jpg',
     },
     role: {
       type: String,
@@ -44,6 +40,7 @@ const userSchema = new Schema(
     timestamps: true,
   },
 );
+
 userSchema.pre('save', function () {
   const user = this;
   if (!user.isModified('Password')) {
@@ -54,5 +51,16 @@ userSchema.pre('save', function () {
   user.salt = salt;
   user.Password = hash;
 });
+userSchema.static('validatePasswordandgeneratetoken', async function (email, password) {
+  const user = await this.findOne({ email });
+  if(!user)throw new Error('Invalid email or password');
+  const salt = user.salt;
+  const hash =user.Password;
+  const userHash = createHmac('sha256', salt).update(password).digest('hex');
+  if(userHash!==hash)throw new Error('Invalid email or password');
+  const token=createToken(user);
+  return token;
+});
+
 const User = model('User', userSchema);
 module.exports = { User };
